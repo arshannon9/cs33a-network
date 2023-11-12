@@ -1,0 +1,70 @@
+body {
+  font-family: Garamond, serif;
+}
+
+textarea {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+a.post-user-link {
+  text-decoration: none;
+}
+
+.header {
+  margin: 20px 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.new-post-form,
+.post-display {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  border: 1px solid black;
+  padding: 20px;
+  margin-bottom: 10px;
+}
+
+.all-posts,
+.following-posts {
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: column;
+}
+
+.edit-button {
+  display: flex;
+  justify-content: space-around;
+}
+
+.post-content {
+  font-size: 20px;
+}
+
+.post-user {
+  font-size: 25px;
+}
+
+.post-date {
+  font-size: 15px;
+  color: gray;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+}
+
+.follow-list {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.hidden {
+  display: none;
+}

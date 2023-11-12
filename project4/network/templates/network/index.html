@@ -1,5 +1,166 @@
-{% extends "network/layout.html" %}
+{% extends "network/layout.html" %} {% block body %}
 
-{% block body %}
-    TODO
+<div class="container-lg page-display">
+  <div class="container-lg header">
+    <h1>All Posts</h1>
+  </div>
+
+  {% if user.is_authenticated %}
+  <form
+    class="container-lg new-post-form"
+    action="{% url 'new_post' %}"
+    method="POST"
+  >
+    {% csrf_token %}
+    <h3>New Post</h3>
+    <textarea
+      class="new-post-content"
+      name="content"
+      row="6"
+      placeholder="I was thinking..."
+    ></textarea>
+    <input type="submit" value="Post" class="btn btn-primary" />
+  </form>
+  {% endif %}
+
+  <div class="all-posts">
+    {% for post in page_posts %}
+    <div class="container-lg post-display">
+      <h5 class="post-user"><a href="{% url 'profile' user_id=post.user.id %}" class="post-user-link">@{{ post.user }}</a></h5>
+      <h6 class="post-content" id="content_{{ post.id }}">{{ post.content }}</h6>
+      <p class="post-date">{{ post.date }}</p>
+      {% if user.is_authenticated %}
+        {% if user == post.user %}
+        <div class="edit-button">
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal_edit_post_{{ post.id }}">Edit</button>
+        </div>
+        <div class="modal" id="modal_edit_post_{{ post.id }}" tabindex="-1" aria-labelledby="modal_edit_post_{{ post.id }}" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Edit Post</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <textarea rows="5" id="textarea_{{ post.id }}" class="form-control" name="content">{{ post.content }}</textarea>
+              </div>
+              <div class="modal-footer">
+                <button class="btn btn-primary" onclick="submitHandler({{ post.id }})">Save changes</button>
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% else %}
+          <button class="btn btn-info col-2 bi bi-hand-thumbs-up-fill" id="{{ post.id }}" onclick="likeHandler({{ post.id }}, {{ user_likes }})"> {{ post.like_count }}</button>
+        {% endif %}
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <nav aria-label="Page navigation">
+    <ul class="pagination">
+      {% if page_posts.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_posts.previous_page_number }}"
+          >Previous</a
+        >
+      </li>
+      {% endif %} {% if page_posts.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_posts.next_page_number }}"
+          >Next</a
+        >
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>
+
+<script>
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if(parts.length == 2) return parts.pop().split(";").shift();
+  }
+
+  function hideModal(id) {
+    const modal = document.getElementById(`modal_edit_post_${id}`);
+
+    modal.classList.remove("show");
+    modal.setAttribute("aria-hidden", "true");
+    modal.setAttribute("style", "display: none");
+
+    const modalsBackdrops = document.getElementsByClassName("modal-backdrop");
+
+    for(let i=0; i<modalsBackdrops.length; i++){
+      document.body.removeChild(modalsBackdrops[i]);
+    }
+  }
+
+  function submitHandler(id) {
+    const textareaValue = document.getElementById(`textarea_${id}`).value;
+    const content = document.getElementById(`content_${id}`);
+
+    fetch(`/edit_post/${id}`, {
+      method: "POST",
+      headers: {"Content-type": "application/json", "X-CSRFToken": getCookie("csrftoken")},
+      body: JSON.stringify({
+        content: textareaValue
+      })
+    })
+    .then(response => response.json())
+    .then(result => {
+      content.innerHTML = result.data;
+      hideModal(id);
+    })
+    .catch(error => console.error('Error editing post:', error));
+  } 
+
+  function likeHandler(id, user_likes) {
+    const like_btn = document.getElementById(`${id}`);
+
+    const liked = user_likes.includes(id);
+
+    const requestUrl = liked ? `/remove_like/${id}` : `/add_like/${id}`;
+
+    fetch(requestUrl)
+      .then(response => response.json())
+      .then(({ data }) => {
+        // Change button icon
+        if (liked) {
+          like_btn.classList.remove('bi-hand-thumbs-up-fill', 'btn-success');
+          like_btn.classList.add('btn-secondary', 'bi-hand-thumbs-up');
+        } else {
+          like_btn.classList.remove('bi-hand-thumbs-up', 'btn-secondary');
+          like_btn.classList.add('btn-success', 'bi-hand-thumbs-up-fill');
+        }
+      })
+    .catch(error => console.error('Error handling like:', error));
+}
+
+
+//   if (liked === true) {
+//     fetch(`/remove_like/${id}`)
+//       .then(response => response.json())
+//       .then(result => {
+//         // Hide unlike button and show like button
+//         unlike_btn.classList.add('hidden');
+//         like_btn.classList.remove('hidden');
+
+//       });
+//   } else {
+//     fetch(`/add_like/${id}`)
+//       .then(response => response.json())
+//       .then(result => {
+//         // Hide like button and show unlike button
+//         like_btn.classList.add('hidden');
+//         unlike_btn.classList.remove('hidden');
+//       });
+//   }
+// }
+
+</script>
+
 {% endblock %}

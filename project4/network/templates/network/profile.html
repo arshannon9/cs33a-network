@@ -1,0 +1,61 @@
+{% extends "network/layout.html" %} {% block body %}
+
+<div class="container-lg page-display">
+  <div class="container-lg header">
+    <h1>{{ username }}</h1>
+    {% if user.is_authenticated %} 
+        {% if user != profile_user %} 
+          {% if is_following %}
+            <form action="{% url 'unfollow' %}" method="POST">
+              {% csrf_token %}
+              <input type="hidden" name="user_follow" value="{{ profile_user }}" />
+              <input type="submit" value="Unfollow" class="btn btn-danger" />
+            </form>
+          {% else %}
+            <form action="{% url 'follow' %}" method="POST">
+              {% csrf_token %}
+              <input type="hidden" name="user_follow" value="{{ profile_user }}" />
+              <input type="submit" value="Follow" class="btn btn-success" />
+            </form>
+          {% endif %} 
+        {% endif %} 
+      {% endif %}
+  </div>
+
+  <div class="container-lg">
+    <div class="follow-list">
+      <h3 class="col-6">Followers: {{ followers.count }}</h3>
+      <h3 class="col-6">Following: {{ following.count }}</h3>
+    </div>
+  </div>
+
+  <div class="all-posts">
+    {% for post in page_posts %}
+    <div class="container-lg post-display">
+      <h5 class="post-user"><a href="{% url 'profile' user_id=post.user.id %}" class="post-user-link">@{{ post.user }}</a></h5>
+      <h6 class="post-content">{{ post.content }}</h6>
+      <p class="post-date">{{ post.date }}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <nav aria-label="Page navigation example">
+    <ul class="pagination">
+      {% if page_posts.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_posts.previous_page_number }}"
+          >Previous</a
+        >
+      </li>
+      {% endif %} {% if page_posts.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_posts.next_page_number }}"
+          >Next</a
+        >
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>
+
+{% endblock %}
