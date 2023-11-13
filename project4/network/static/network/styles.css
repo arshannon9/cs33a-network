@@ -1,5 +1,7 @@
 body {
   font-family: Garamond, serif;
+  overflow: scroll;
+  background-color: lightgray;
 }
 
 textarea {
@@ -11,11 +13,44 @@ a.post-user-link {
   text-decoration: none;
 }
 
+.all-posts,
+.following-posts {
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: column;
+}
+
+.btn-danger {
+  --bs-btn-bg: #d6544d;
+  --bs-btn-color: #000;
+}
+
+.btn-success {
+  --bs-btn-color: #000;
+}
+
+.edit-button {
+  display: flex;
+  justify-content: space-around;
+}
+
+.follow-list {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
 .header {
   margin: 20px 0;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+}
+
+.navbar {
+  position: sticky;
+  top: 0;
+  padding-left: 10px;
 }
 
 .new-post-form,
@@ -25,20 +60,15 @@ a.post-user-link {
   justify-content: center;
   align-items: flex-start;
   border: 1px solid black;
+  border-radius: 20px;
   padding: 20px;
   margin-bottom: 10px;
+  background-color: cornsilk;
 }
 
-.all-posts,
-.following-posts {
+.pagination {
   display: flex;
-  justify-content: flex-start;
-  flex-direction: column;
-}
-
-.edit-button {
-  display: flex;
-  justify-content: space-around;
+  justify-content: center;
 }
 
 .post-content {
@@ -54,17 +84,29 @@ a.post-user-link {
   color: gray;
 }
 
-.pagination {
+.post-buttons {
   display: flex;
+  flex: row;
+  justify-content: space-between;
+}
+
+#login-form,
+#register-form {
+  width: 25%;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
 }
 
-.follow-list {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
+#login-btn,
+#register-btn {
+  width: 25%;
+  margin: 10px;
 }
 
-.hidden {
-  display: none;
+.form-group,
+.login-footer,
+.register-footer {
+  margin: 10px;
 }
+

@@ -1,14 +1,20 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
+<div class="container-lg page-display">
+    <div class="container-lg header">    
+        <h2>Login</h2>
+    </div>
 
-    <h2>Login</h2>
-
-    {% if message %}
-        <div>{{ message }}</div>
+    {% if messages %}
+        <div class="alert alert-warning">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
     {% endif %}
 
-    <form action="{% url 'login' %}" method="post">
+    <form id="login-form" action="{% url 'login' %}" method="post">
         {% csrf_token %}
         <div class="form-group">
             <input autofocus class="form-control" type="text" name="username" placeholder="Username">
@@ -16,9 +22,11 @@
         <div class="form-group">
             <input class="form-control" type="password" name="password" placeholder="Password">
         </div>
-        <input class="btn btn-primary" type="submit" value="Login">
+        <input id="login-btn" class="btn btn-primary" type="submit" value="Login">
     </form>
-
-    Don't have an account? <a href="{% url 'register' %}">Register here.</a>
+    <div class="login-footer">
+        Don't have an account? <a href="{% url 'register' %}">Register here.</a>
+    </div>
+</div>
 
 {% endblock %}

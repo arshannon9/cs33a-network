@@ -19,7 +19,7 @@
       row="6"
       placeholder="I was thinking..."
     ></textarea>
-    <input type="submit" value="Post" class="btn btn-primary" />
+    <input type="submit" value="Post" class="btn btn-success" />
   </form>
   {% endif %}
 
@@ -29,11 +29,18 @@
       <h5 class="post-user"><a href="{% url 'profile' user_id=post.user.id %}" class="post-user-link">@{{ post.user }}</a></h5>
       <h6 class="post-content" id="content_{{ post.id }}">{{ post.content }}</h6>
       <p class="post-date">{{ post.date }}</p>
+
+
+      <div class="post-buttons">
       {% if user.is_authenticated %}
+        <!-- Like/Unlike button -->
+        <button class="btn btn-info bi bi-hand-thumbs-up-fill" id="{{ post.id }}" onclick="likeHandler({{ post.id }}, {{ user_likes }})"> <span id="like_count_display_{{ post.id }}">{{ post.like_count }}</span></button>
         {% if user == post.user %}
+        <!-- Edit button -->
         <div class="edit-button">
-          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal_edit_post_{{ post.id }}">Edit</button>
+          <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modal_edit_post_{{ post.id }}">Edit</button>
         </div>
+        <!-- Edit functionality using Bootstrap modal -->
         <div class="modal" id="modal_edit_post_{{ post.id }}" tabindex="-1" aria-labelledby="modal_edit_post_{{ post.id }}" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
@@ -51,27 +58,23 @@
             </div>
           </div>
         </div>
-        {% else %}
-          <button class="btn btn-info col-2 bi bi-hand-thumbs-up-fill" id="{{ post.id }}" onclick="likeHandler({{ post.id }}, {{ user_likes }})"> {{ post.like_count }}</button>
         {% endif %}
       {% endif %}
+    </div>
     </div>
     {% endfor %}
   </div>
 
+  <!-- Page navigation -->
   <nav aria-label="Page navigation">
     <ul class="pagination">
       {% if page_posts.has_previous %}
       <li class="page-item">
-        <a class="page-link" href="?page={{ page_posts.previous_page_number }}"
-          >Previous</a
-        >
+        <a class="page-link" href="?page={{ page_posts.previous_page_number }}">Previous</a>
       </li>
       {% endif %} {% if page_posts.has_next %}
       <li class="page-item">
-        <a class="page-link" href="?page={{ page_posts.next_page_number }}"
-          >Next</a
-        >
+        <a class="page-link" href="?page={{ page_posts.next_page_number }}">Next</a>
       </li>
       {% endif %}
     </ul>
@@ -121,46 +124,24 @@
   function likeHandler(id, user_likes) {
     const like_btn = document.getElementById(`${id}`);
 
-    const liked = user_likes.includes(id);
+    let liked = user_likes.includes(id);
 
-    const requestUrl = liked ? `/remove_like/${id}` : `/add_like/${id}`;
+    const requestUrl = `/add_or_remove_like/${id}`;
 
     fetch(requestUrl)
       .then(response => response.json())
-      .then(({ data }) => {
-        // Change button icon
-        if (liked) {
-          like_btn.classList.remove('bi-hand-thumbs-up-fill', 'btn-success');
-          like_btn.classList.add('btn-secondary', 'bi-hand-thumbs-up');
+      .then(data => {
+
+        if (data && data.like_count !== undefined) {
+          // Update the like count on the page
+          const likeCountDisplay = document.getElementById(`like_count_display_${id}`);
+          likeCountDisplay.innerText = data.like_count;
         } else {
-          like_btn.classList.remove('bi-hand-thumbs-up', 'btn-secondary');
-          like_btn.classList.add('btn-success', 'bi-hand-thumbs-up-fill');
+          console.error('Invalid response format:', data);
         }
       })
-    .catch(error => console.error('Error handling like:', error));
+      .catch(error => console.error('Error handling like:', error));
 }
-
-
-//   if (liked === true) {
-//     fetch(`/remove_like/${id}`)
-//       .then(response => response.json())
-//       .then(result => {
-//         // Hide unlike button and show like button
-//         unlike_btn.classList.add('hidden');
-//         like_btn.classList.remove('hidden');
-
-//       });
-//   } else {
-//     fetch(`/add_like/${id}`)
-//       .then(response => response.json())
-//       .then(result => {
-//         // Hide like button and show unlike button
-//         like_btn.classList.add('hidden');
-//         unlike_btn.classList.remove('hidden');
-//       });
-//   }
-// }
-
 </script>
 
 {% endblock %}
