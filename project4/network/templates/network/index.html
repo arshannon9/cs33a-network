@@ -1,11 +1,14 @@
 {% extends "network/layout.html" %} {% block body %}
 
+<!-- Main content container -->
 <div class="container-lg page-display">
+  <!-- Page header -->
   <div class="container-lg header">
     <h1>All Posts</h1>
   </div>
 
   {% if user.is_authenticated %}
+  <!-- New post form for authenticated users -->
   <form
     class="container-lg new-post-form"
     action="{% url 'new_post' %}"
@@ -13,24 +16,31 @@
   >
     {% csrf_token %}
     <h3>New Post</h3>
+    <!-- Textarea for new post content -->
     <textarea
       class="new-post-content"
       name="content"
       row="6"
       placeholder="I was thinking..."
     ></textarea>
+    <!-- Submit button for posting -->
     <input type="submit" value="Post" class="btn btn-success" />
   </form>
   {% endif %}
 
+  <!-- Display all posts -->
   <div class="all-posts">
     {% for post in page_posts %}
+    <!-- Individual post display -->
     <div class="container-lg post-display">
+      <!-- Post user and link to their profile -->
       <h5 class="post-user"><a href="{% url 'profile' user_id=post.user.id %}" class="post-user-link">@{{ post.user }}</a></h5>
+      <!-- Post content -->
       <h6 class="post-content" id="content_{{ post.id }}">{{ post.content }}</h6>
+      <!-- Post date -->
       <p class="post-date">{{ post.date }}</p>
 
-
+      <!-- Post buttons section -->
       <div class="post-buttons">
       {% if user.is_authenticated %}
         <!-- Like/Unlike button -->
@@ -49,10 +59,13 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
+                <!-- Textarea for editing post content -->
                 <textarea rows="5" id="textarea_{{ post.id }}" class="form-control" name="content">{{ post.content }}</textarea>
               </div>
               <div class="modal-footer">
+                <!-- Button to save changes -->
                 <button class="btn btn-primary" onclick="submitHandler({{ post.id }})">Save changes</button>
+                <!-- Button to close modal -->
                 <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
               </div>
             </div>
@@ -68,11 +81,15 @@
   <!-- Page navigation -->
   <nav aria-label="Page navigation">
     <ul class="pagination">
+      <!-- Previous page link -->
       {% if page_posts.has_previous %}
       <li class="page-item">
         <a class="page-link" href="?page={{ page_posts.previous_page_number }}">Previous</a>
       </li>
-      {% endif %} {% if page_posts.has_next %}
+      {% endif %} 
+      
+      <!-- Next page link -->
+      {% if page_posts.has_next %}
       <li class="page-item">
         <a class="page-link" href="?page={{ page_posts.next_page_number }}">Next</a>
       </li>
@@ -81,13 +98,17 @@
   </nav>
 </div>
 
+
+<!-- JavaScript section -->
 <script>
+  // Function to get the value of a cookie by name
   function getCookie(name) {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
     if(parts.length == 2) return parts.pop().split(";").shift();
   }
 
+  // Function to hide a Bootstrap modal by ID
   function hideModal(id) {
     const modal = document.getElementById(`modal_edit_post_${id}`);
 
@@ -95,17 +116,19 @@
     modal.setAttribute("aria-hidden", "true");
     modal.setAttribute("style", "display: none");
 
+    // Remove modal backdrops
     const modalsBackdrops = document.getElementsByClassName("modal-backdrop");
-
     for(let i=0; i<modalsBackdrops.length; i++){
       document.body.removeChild(modalsBackdrops[i]);
     }
   }
 
+  // Function to handle submitting edited post
   function submitHandler(id) {
     const textareaValue = document.getElementById(`textarea_${id}`).value;
     const content = document.getElementById(`content_${id}`);
 
+    // Fetch to update the post content
     fetch(`/edit_post/${id}`, {
       method: "POST",
       headers: {"Content-type": "application/json", "X-CSRFToken": getCookie("csrftoken")},
@@ -121,17 +144,21 @@
     .catch(error => console.error('Error editing post:', error));
   } 
 
+  // Function to handle liking/unliking a post
   function likeHandler(id, user_likes) {
+    // Get the like button element
     const like_btn = document.getElementById(`${id}`);
 
+    // Check if the post is liked by the user
     let liked = user_likes.includes(id);
 
+    // URL for adding/removing like
     const requestUrl = `/add_or_remove_like/${id}`;
 
+    // Fetch to update like count
     fetch(requestUrl)
       .then(response => response.json())
       .then(data => {
-
         if (data && data.like_count !== undefined) {
           // Update the like count on the page
           const likeCountDisplay = document.getElementById(`like_count_display_${id}`);

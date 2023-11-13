@@ -1,17 +1,22 @@
 {% extends "network/layout.html" %} {% block body %}
 
+<!-- Main content container -->
 <div class="container-lg page-display">
+  <!-- Page header -->
   <div class="container-lg header">
+    <!-- Display username belonging to profile -->
     <h1><i class="fa-solid fa-paw"></i> {{ username }}</h1>
     {% if user.is_authenticated %} 
         {% if user != profile_user %} 
           {% if is_following %}
+          <!-- Unfollow button if the current user is following the profile user -->
             <form action="{% url 'unfollow' %}" method="POST">
               {% csrf_token %}
               <input type="hidden" name="user_follow" value="{{ profile_user }}" />
               <input type="submit" value="Unfollow" class="btn btn-danger" />
             </form>
           {% else %}
+          <!-- Follow button if the current user is not following the profile user -->
             <form action="{% url 'follow' %}" method="POST">
               {% csrf_token %}
               <input type="hidden" name="user_follow" value="{{ profile_user }}" />
@@ -24,18 +29,24 @@
 
   <div class="container-lg">
     <div class="follow-list">
+      <!-- Display the number of followers and users that profile user is following -->
       <h3 class="col-6">Followers: {{ followers.count }}</h3>
       <h3 class="col-6">Following: {{ following.count }}</h3>
     </div>
   </div>
 
+  <!-- Display all profile user's posts -->
   <div class="all-posts">
     {% for post in page_posts %}
     <div class="container-lg post-display">
+      <!-- Link to the user's profile who made the post -->
       <h5 class="post-user"><a href="{% url 'profile' user_id=post.user.id %}" class="post-user-link">@{{ post.user }}</a></h5>
+      <!-- Display the content of the post -->
       <h6 class="post-content" id="content_{{ post.id }}">{{ post.content }}</h6>
+      <!-- Display the date of the post -->
       <p class="post-date">{{ post.date }}</p>
 
+      <!-- Post buttons section -->
       <div class="post-buttons">
       {% if user.is_authenticated %}
         <!-- Like/Unlike button -->
@@ -54,10 +65,13 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
+                <!-- Textarea for editing post content -->
                 <textarea rows="5" id="textarea_{{ post.id }}" class="form-control" name="content">{{ post.content }}</textarea>
               </div>
               <div class="modal-footer">
+                <!-- Button to save changes -->
                 <button class="btn btn-primary" onclick="submitHandler({{ post.id }})">Save changes</button>
+                <!-- Button to close modal -->
                 <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
               </div>
             </div>
@@ -70,32 +84,37 @@
     {% endfor %}
   </div>
 
-  <nav aria-label="Page navigation example">
+  <!-- Page navigation -->
+  <nav aria-label="Page navigation">
     <ul class="pagination">
+      <!-- Previous page link -->
       {% if page_posts.has_previous %}
       <li class="page-item">
-        <a class="page-link" href="?page={{ page_posts.previous_page_number }}"
-          >Previous</a
-        >
+        <a class="page-link" href="?page={{ page_posts.previous_page_number }}">Previous</a>
       </li>
-      {% endif %} {% if page_posts.has_next %}
+      {% endif %} 
+      
+      <!-- Next page link -->
+      {% if page_posts.has_next %}
       <li class="page-item">
-        <a class="page-link" href="?page={{ page_posts.next_page_number }}"
-          >Next</a
-        >
+        <a class="page-link" href="?page={{ page_posts.next_page_number }}">Next</a>
       </li>
       {% endif %}
     </ul>
   </nav>
 </div>
 
+
+<!-- JavaScript section -->
 <script>
+  // Function to get the value of a cookie by name
   function getCookie(name) {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
     if(parts.length == 2) return parts.pop().split(";").shift();
   }
 
+  // Function to hide a Bootstrap modal by ID
   function hideModal(id) {
     const modal = document.getElementById(`modal_edit_post_${id}`);
 
@@ -103,17 +122,19 @@
     modal.setAttribute("aria-hidden", "true");
     modal.setAttribute("style", "display: none");
 
+    // Remove modal backdrops
     const modalsBackdrops = document.getElementsByClassName("modal-backdrop");
-
     for(let i=0; i<modalsBackdrops.length; i++){
       document.body.removeChild(modalsBackdrops[i]);
     }
   }
 
+  // Function to handle submitting edited post
   function submitHandler(id) {
     const textareaValue = document.getElementById(`textarea_${id}`).value;
     const content = document.getElementById(`content_${id}`);
 
+    // Fetch to update the post content
     fetch(`/edit_post/${id}`, {
       method: "POST",
       headers: {"Content-type": "application/json", "X-CSRFToken": getCookie("csrftoken")},
@@ -129,13 +150,18 @@
     .catch(error => console.error('Error editing post:', error));
   } 
 
+  // Function to handle liking/unliking a post
   function likeHandler(id, user_likes) {
+    // Get the like button element
     const like_btn = document.getElementById(`${id}`);
 
+    // Check if the post is liked by the user
     let liked = user_likes.includes(id);
 
+    // URL for adding/removing like
     const requestUrl = `/add_or_remove_like/${id}`;
 
+    // Fetch to update like count
     fetch(requestUrl)
       .then(response => response.json())
       .then(data => {
